@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Online Piano - Song Notation</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: #222;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 15px;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+    }
+
+    /* Back Link Style */
+    .song-list-link {
+      margin-bottom: 20px;
+      background: #111;
+      padding: 10px 20px;
+      border-radius: 6px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+
+    .song-list-link a {
+      color: #fff;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 14px;
+      transition: color 0.2s;
+    }
+
+    .song-list-link a:hover {
+      color: #4CAF50;
+    }
+
+    h1 {
+      margin-bottom: 5px;
+      font-size: 1.5rem;
+      text-align: center;
+    }
+
+    p {
+      color: #aaa;
+      margin-bottom: 20px;
+      text-align: center;
+      max-width: 650px;
+      font-size: 0.9rem;
+    }
+
+    .sheet-music {
+      max-width: 400px;
+      width: 100%;
+      height: auto;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      background: #fff;
+      padding: 8px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+
+    /* Outer Wrapper to handle horizontal scroll on small screens */
+    .piano-wrapper {
+      width: 100%;
+      max-width: 520px;
+      overflow-x: auto;
+      padding-bottom: 10px;
+      touch-action: pan-x;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    #piano {
+      display: flex;
+      position: relative;
+      background: #000;
+      padding: 10px;
+      border-radius: 8px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      width: max-content;
+      margin: 0 auto;
+    }
+
+    .key {
+      box-sizing: border-box;
+      position: relative;
+      cursor: pointer;
+      user-select: none;
+      border-radius: 0 0 5px 5px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      font-weight: bold;
+      transition: background 0.1s;
+      touch-action: manipulation;
+    }
+
+    .white {
+      width: 40px;
+      height: 170px;
+      background: #fff;
+      color: #333;
+      border: 1px solid #ccc;
+      z-index: 1;
+      padding-bottom: 12px;
+      font-size: 11px;
+    }
+
+    .white.active, .white:active {
+      background: #d4d4d4;
+    }
+
+    .black {
+      width: 26px;
+      height: 105px;
+      background: #333;
+      color: #fff;
+      position: absolute;
+      z-index: 2;
+      border-radius: 0 0 4px 4px;
+      border: 1px solid #111;
+      padding-bottom: 8px;
+      font-size: 9px;
+    }
+
+    .black.active, .black:active {
+      background: #555;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Link back to main song library -->
+  <div class="song-list-link">
+    <a href="https://mikelocin29-star.github.io/Ms-Kim-s-Song-List/">← Back to Song Library</a>
+  </div>
+
+  <h1>Online Piano (C4 - G5)</h1>
+  <p>White keys: <b>1 to =</b> | Black keys: <b>Q,W | R,T,Y | I,O | [</b> (or tap/click!)</p>
+
+  <img src="notation.png" alt="Piano Grid Notation" class="sheet-music" onerror="this.style.display='none'">
+
+  <div class="piano-wrapper">
+    <div id="piano">
+      <!-- White Keys (C4 to G5) -->
+      <div class="key white" data-note="C4" data-key="1">1</div>
+      <div class="key white" data-note="D4" data-key="2">2</div>
+      <div class="key white" data-note="E4" data-key="3">3</div>
+      <div class="key white" data-note="F4" data-key="4">4</div>
+      <div class="key white" data-note="G4" data-key="5">5</div>
+      <div class="key white" data-note="A4" data-key="6">6</div>
+      <div class="key white" data-note="B4" data-key="7">7</div>
+      <div class="key white" data-note="C5" data-key="8">8</div>
+      <div class="key white" data-note="D5" data-key="9">9</div>
+      <div class="key white" data-note="E5" data-key="0">0</div>
+      <div class="key white" data-note="F5" data-key="-">-</div>
+      <div class="key white" data-note="G5" data-key="=">=</div>
+
+      <!-- Black Keys (Positioned proportionally over white key boundaries) -->
+      <div class="key black" data-note="C#4" data-key="q" style="left: calc(10px + 40px * 1 - 13px);">Q</div>
+      <div class="key black" data-note="D#4" data-key="w" style="left: calc(10px + 40px * 2 - 13px);">W</div>
+      <div class="key black" data-note="F#4" data-key="r" style="left: calc(10px + 40px * 4 - 13px);">R</div>
+      <div class="key black" data-note="G#4" data-key="t" style="left: calc(10px + 40px * 5 - 13px);">T</div>
+      <div class="key black" data-note="A#4" data-key="y" style="left: calc(10px + 40px * 6 - 13px);">Y</div>
+      <div class="key black" data-note="C#5" data-key="i" style="left: calc(10px + 40px * 8 - 13px);">I</div>
+      <div class="key black" data-note="D#5" data-key="o" style="left: calc(10px + 40px * 9 - 13px);">O</div>
+      <div class="key black" data-note="F#5" data-key="[" style="left: calc(10px + 40px * 11 - 13px);">[</div>
+    </div>
+  </div>
+
+  <script>
+    const pianoSampler = new Tone.Sampler({
+      urls: {
+        "C4": "C4.mp3",
+        "D#4": "Ds4.mp3",
+        "F#4": "Fs4.mp3",
+        "A4": "A4.mp3",
+      },
+      baseUrl: "https://tonejs.github.io/audio/salamander/",
+      onload: ()
