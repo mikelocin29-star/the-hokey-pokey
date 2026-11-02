@@ -149,7 +149,7 @@
   </div>
 
   <h1>Online Piano (C4 - G5)</h1>
-  <p>White keys: <b>1 to =</b> | Black keys: <b>Q,W | R,T,Y | I,O | [</b> (or tap/click!)</p>
+  <p>White keys: <b>1 to =</b> | Black keys: <b>Q,W | R,T,Y | I,O | [</b> (Press and hold to sustain!)</p>
 
   <img src="notation.png" alt="Piano Grid Notation" class="sheet-music" onerror="this.style.display='none'">
 
@@ -182,6 +182,7 @@
   </div>
 
   <script>
+    // Original Salamander acoustic piano sampler sound engine with an added release envelope for smooth sustain
     const pianoSampler = new Tone.Sampler({
       urls: {
         "C4": "C4.mp3",
@@ -190,4 +191,71 @@
         "A4": "A4.mp3",
       },
       baseUrl: "https://tonejs.github.io/audio/salamander/",
-      onload: ()
+      release: 1.0
+    }).toDestination();
+
+    async function startNote(note, element) {
+      if (Tone.context.state !== 'running') {
+        await Tone.start();
+      }
+      pianoSampler.triggerAttack(note);
+      if (element) element.classList.add('active');
+    }
+
+    function stopNote(note, element) {
+      pianoSampler.triggerRelease(note);
+      if (element) element.classList.remove('active');
+    }
+
+    // Attach Touch and Mouse Listeners for Press & Hold Sustain
+    document.querySelectorAll('.key[data-note]').forEach(key => {
+      const note = key.dataset.note;
+
+      // Touch events for mobile & Chromebook touchscreens
+      key.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        startNote(note, key);
+      }, { passive: false });
+
+      key.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        stopNote(note, key);
+      }, { passive: false });
+
+      key.addEventListener('touchcancel', (e) => {
+        e.preventDefault();
+        stopNote(note, key);
+      }, { passive: false });
+
+      // Mouse events for desktop
+      key.addEventListener('mousedown', () => startNote(note, key));
+      key.addEventListener('mouseup', () => stopNote(note, key));
+      key.addEventListener('mouseleave', () => stopNote(note, key));
+    });
+
+    // Physical Keyboard Tracking (Press and Hold Sustain)
+    const activeKeys = {};
+
+    window.addEventListener('keydown', (e) => {
+      if (e.repeat) return; // Prevent stuttering
+      const targetKey = e.key.toLowerCase();
+      const keyElement = document.querySelector(`.key[data-key="${targetKey}"]`);
+
+      if (keyElement && !activeKeys[targetKey]) {
+        activeKeys[targetKey] = true;
+        startNote(keyElement.dataset.note, keyElement);
+      }
+    });
+
+    window.addEventListener('keyup', (e) => {
+      const targetKey = e.key.toLowerCase();
+      const keyElement = document.querySelector(`.key[data-key="${targetKey}"]`);
+
+      if (keyElement) {
+        delete activeKeys[targetKey];
+        stopNote(keyElement.dataset.note, keyElement);
+      }
+    });
+  </script>
+</body>
+</html>
